@@ -40,10 +40,10 @@ The main function to validate a JWT and obtain the JWT claims is `jwtValidate()`
 
 Input JWT/JWS should be in JWS Compact Serialization format: a string of three BASE64URL-encoded parts (header, payload, and signature), separated by `.` symbols.
 
-| Compact Serialization Format | `BASE64URL(JSON(H))` | `.` | `BASE64URL(P)` | `.` | `BASE64URL(S)` |
-|:---|:---|:---:|:---|:---:|:---|
-| JWS | `H = JWS Header` | | `P = ArrayBuffer` | | `S = JWS Signature` |
-| JWT | `H = JWS Header` | | `P = JSON(JWT Claims)` | | `S = JWS Signature` |
+| Compact Serialization Format | `BASE64URL(JSON( x ))` | `.` | `BASE64URL( x )` | `.` | `BASE64URL( x )` |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| JWS | `JWS Header` | | `ArrayBuffer` | | `JWS Signature` |
+| JWT | `JWS Header` | | `JSON(JWT Claims)` | | `JWS Signature` |
 
 ## Example
 
@@ -78,7 +78,7 @@ jwtValidate(token, {keys: jwk})
   });
 ```
 
-We don't need to provide any keys if a token JWS header has information about the key to validate it. See [Key providers](##-Keys-providers).
+We don't need to provide any keys if a token JWS header has information about the key to validate it. See [Key providers](#keys-providers).
 
 ## JWT/JWS validation
 
@@ -106,7 +106,7 @@ To validate a JWS Signature the correct public key is required. The key should b
 This is the main format of key data supported by the package.
 * A JWK is provided in JWS header (parameter `jwk`).
 * One or more JWK is known to the application.
-* URI of [JWKS endpoint](###-JWKS-endpoint) is provided in JWS header (parameter `jku`).
+* URI of [JWKS endpoint](#jwks-endpoint) is provided in JWS header (parameter `jku`).
 * URI of JWKS endpoint is known to the application (for example `.well-known/jwks.json` for OAuth2 applications).
 
 The default key provider `jwsHeaderKeysProvider()` gets `jwk` parameter key and adds all the keys from JWKS endpoint defined  by `jku` parameter. One can add some more application keys by passing them as an argument for `jwsHeaderKeysProvider(appKeys)`. `appKeys` value can be `JWK`, `JWK[]`, or `JWKS` object.
