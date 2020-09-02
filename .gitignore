@@ -1,0 +1,9 @@
+# compiled output
+/esm
+/cjs
+
+# dependencies
+/node_modules
+
+#coverage data
+/coverage

@@ -1,0 +1,20 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "target": "ES2016",
+    "types": [],
+    "module": "ES6",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "declaration": true,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "outDir": "lib",
+    "noEmitOnError": true,
+    "strict": true
+  },
+  "include": [
+    "src"
+  ]
+}

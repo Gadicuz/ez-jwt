@@ -1,0 +1,51 @@
+{
+  "name": "ez-jwt",
+  "version": "1.0.0",
+  "description": "JSON Web Token (JWT) and JSON Web Signature (JWS) validation using WEB Cryptography API",
+  "keywords": [
+    "JWT",
+    "JWS",
+    "validation",
+    "browser",
+    "RFC 7515",
+    "RFC 7519",
+    "Web Cryptography API"
+  ],
+  "author": "Nikolay Postnikov <nick.postnikov@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gadicuz/ez-jwt.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Gadicuz/ez-jwt/issues"
+  },
+  "homepage": "https://github.com/Gadicuz/ez-jwt#readme",
+  "files": [
+    "lib"
+  ],
+  "types": "./lib/ez-jwt.d.ts",
+  "module": "./lib/ez-jwt.js",
+  "sideEffects": false,
+  "type": "module",
+  "main": "./lib/ez-jwt.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.0.1",
+    "@typescript-eslint/parser": "^4.0.1",
+    "eslint": "^7.7.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-no-null": "^1.0.2",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-tsdoc": "^0.2.6",
+    "prettier": "^2.0.5",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.2"
+  }
+}
