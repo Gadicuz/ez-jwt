@@ -207,12 +207,13 @@ export function jwsHeaderKeysProvider(keys?: JwsAppKeys): JwsKeyProvider {
     const uri = h.jku;
     return !uri
       ? Promise.resolve(k)
-      : jwkLoadKeySet(uri)
-          .then((jwks) => k.concat(jwks.keys))
-          .catch((e) => {
+      : jwkLoadKeySet(uri).then(
+          (jwks) => k.concat(jwks.keys),
+          (e) => {
             console.log(`JWS: key set '${uri}' download error '${String(e)}`);
             return k;
-          });
+          }
+        );
   };
 }
 
@@ -264,18 +265,14 @@ export function jwsValidate(
   const [h, p, s] = parts.slice(1); // h, p, s - string_b64url
   const input = u8stoab(`${h}.${p}`);
   const sign = b64urlDecode(s);
-  const jws = {
-    header: JSON.parse(abDecode(b64urlDecode(h), 'utf-8')) as JWSHeader,
-    payload: b64urlDecode(p),
-  };
-  if (jws.header.crit?.length) return Promise.reject('JWS: unknown extention');
-  const setup = jwsGetSetup(jws.header.alg);
+  const hdr = JSON.parse(abDecode(b64urlDecode(h), 'utf-8')) as JWSHeader;
+  if (hdr.crit?.length) return Promise.reject('JWS: unknown extention');
+  const setup = jwsGetSetup(hdr.alg);
   if (typeof setup === 'string') return Promise.reject(setup);
-  const verifier =
+  const validator =
     setup == undefined
       ? Promise.resolve(!s.length)
-      : keyProvider(jws.header).then((keys) => {
-          const hdr = jws.header;
+      : keyProvider(hdr).then((keys) => {
           if (hdr.kid != undefined) keys = keys.filter((k) => k.kid === hdr.kid);
           keys = keys.filter(
             (k) =>
@@ -284,14 +281,21 @@ export function jwsValidate(
               (k.key_ops == undefined || k.key_ops.includes('verify'))
           );
           if (!keys.length) throw 'JWS: no key found';
-          if (keys.length > 1) throw 'JWS: multiple keys found';
-          return crypto.subtle
-            .importKey('jwk', keys[0], setup, false, ['verify'])
-            .then((key) => crypto.subtle.verify(setup, key, sign, input));
+          const validate = (k: JWK, setup: HmacSetup | RsaPkcs1Setup | EcdsaSetup | RsaPssSetup) =>
+            crypto.subtle
+              .importKey('jwk', k, setup, false, ['verify'])
+              .then((ck) => crypto.subtle.verify(setup, ck, sign, input))
+              .then(undefined, () => false);
+          return keys.length == 1
+            ? validate(keys[0], setup)
+            : Promise.all(keys.map((k) => validate(k, setup))).then((res) => res.some((r) => r));
         });
-  return verifier.then((status) => {
+  return validator.then((status) => {
     if (!status) throw 'JWS: validation failed';
-    return jws;
+    return {
+      header: hdr,
+      payload: b64urlDecode(p),
+    };
   });
 }
 
