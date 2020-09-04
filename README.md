@@ -36,18 +36,7 @@ npm i ez-jwt
 
 # Usage
 
-The main function to validate a JWT and obtain the JWT claims is `jwtValidate()`. Any digitally signed JWT is a JWS with a well-defined payload, which is [JWT Claims](https://tools.ietf.org/html/rfc7519#section-4).
-
-Input JWT/JWS should be in JWS Compact Serialization format: a string of three BASE64URL-encoded parts (header, payload, and signature), separated by `.` symbols.
-
-| Compact Serialization Format | `BASE64URL(JSON( x ))` | `.` | `BASE64URL( x )` | `.` | `BASE64URL( x )` |
-|:---|:---:|:---:|:---:|:---:|:---:|
-| JWS | `JWS Header` | | `ArrayBuffer` | | `JWS Signature` |
-| JWT | `JWS Header` | | `JSON(JWT Claims)` | | `JWS Signature` |
-
-## Example
-
-Let's use [RFC 7515 example JWT](https://tools.ietf.org/html/rfc7515#appendix-A.1). Additions within string literal values are for display purposes only.
+The main function to validate a JWT and obtain the JWT claims is `jwtValidate()`. Let's use [RFC 7515 example JWT](https://tools.ietf.org/html/rfc7515#appendix-A.1).
 
 ```typescript
 // JWS header is { typ: 'JWT', alg: 'HS256' }
@@ -82,6 +71,15 @@ We don't need to provide any keys if a token JWS header has information about th
 
 ## JWT/JWS validation
 
+Input JWT/JWS should be in JWS Compact Serialization format: a string of three BASE64URL-encoded parts (header, payload, and signature), separated by `.` symbols.
+
+Any digitally signed JWT is a JWS with a well-defined payload, which is [JWT Claims](https://tools.ietf.org/html/rfc7519#section-4).
+
+| Compact Serialization Format | `BASE64URL(JSON( x ))` | `.` | `BASE64URL( x )` | `.` | `BASE64URL( x )` |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| JWS | `JWS Header` | | `ArrayBuffer` | | `JWS Signature` |
+| JWT | `JWS Header` | | `JSON(JWT Claims)` | | `JWS Signature` |
+
 JWT validation process performed by `jwtValidate()`:
 * Validate JWT as JWS using `jwsValidate()`.
    - Split the input JWS into three parts: header, payload, signature.
@@ -91,7 +89,7 @@ JWT validation process performed by `jwtValidate()`:
    - Check JWS header parameter `alg` (should be one of the standard algorithms).
    - Apply the key provider function to the header and get an array of keys.
    - Filter key array by key ID, algorithm, usage, and operations.
-   - Use the remaining key to verify JWS signature.
+   - Use the remaining key(s) to verify JWS signature.
    - Return JWS header and payload.
 * Check JWS header parameters `typ` (should be undefined or equals `'JWT'`) and `cty` (should be undefined).
 * UTF-8 decode and JSON parse JWS payload, get JWT claims object.
