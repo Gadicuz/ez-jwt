@@ -24,7 +24,7 @@
   * [RFC 7517](https://tools.ietf.org/html/rfc7517) JSON Web Key (JWK)
   * [RFC 7518](https://tools.ietf.org/html/rfc7518) JSON Web Algorithms (JWA)
   * [RFC 7519](https://tools.ietf.org/html/rfc7519) JSON Web Token (JWT)
-* Tiny package, no dependencies
+* Tiny package
 * ES6 module, typings available
 
 

@@ -1,3 +1,4 @@
+import * as B64 from 'b64web';
 /**
  * RFC 7518 (https://tools.ietf.org/html/rfc7518) JSON Web Algorithms (JWA)
  */
@@ -142,7 +143,7 @@ export function jwtValidate<T extends JWT>(jwscs: JWSCompactSerialization, opt?:
   return jwsValidate(jwscs, jwkAppProvider(opt?.keys)).then((jws) => {
     if (jws.header.typ && jws.header.typ !== 'JWT') throw 'JWT: invalid type';
     if (jws.header.cty) throw 'JWT: invalid content type';
-    const claims = JSON.parse(abDecode(jws.payload)) as T;
+    const claims = JSON.parse(B64.btos(jws.payload)) as T;
     const grace = opt?.grace ?? 0;
     const now = Date.now() / 1000;
     if (claims.exp != undefined && claims.exp + grace < now) throw 'JWT: expired';
@@ -262,10 +263,10 @@ export function jwsValidate(
 ): Promise<JWS> {
   const parts = /^([\w-]*)\.([\w-]*)\.([\w-]*)$/.exec(jwscs);
   if (!parts) return Promise.reject('JWS: invalid serialization format');
-  const [h, p, s] = parts.slice(1); // h, p, s - string_b64url
-  const input = u8stoab(`${h}.${p}`);
-  const sign = b64urlDecode(s);
-  const hdr = JSON.parse(abDecode(b64urlDecode(h), 'utf-8')) as JWSHeader;
+  const [h, p, s] = parts.slice(1); // h, p, s - BASE64URL
+  const input = B64.stob(`${h}.${p}`);
+  const sign = B64.decode(s);
+  const hdr = JSON.parse(B64.decode(h, 'utf-8')) as JWSHeader;
   if (hdr.crit?.length) return Promise.reject('JWS: unknown extention');
   const setup = jwsGetSetup(hdr.alg);
   if (typeof setup === 'string') return Promise.reject(setup);
@@ -294,31 +295,7 @@ export function jwsValidate(
     if (!status) throw 'JWS: validation failed';
     return {
       header: hdr,
-      payload: b64urlDecode(p),
+      payload: B64.decode(p),
     };
   });
-}
-
-type string_uint8 = string; // #0x00..#0xFF
-type string_b64 = string; // A..Za..z0..9+/ padding =
-type string_b64url = string; // A..Za..z0..9-_ no padding
-
-function b64urlUnpack(b64u: string_b64url): string_b64 {
-  // if (s === '') return '';
-  const pad = b64u.length % 4;
-  if (pad == 1 || !/^[\w-]*$/.test(b64u)) throw 'Invalid base64url string';
-  return b64u.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat(-pad & 3);
-}
-
-function abDecode(ab: ArrayBuffer, decoder: TextDecoder | string = 'utf-8'): string {
-  if (typeof decoder === 'string') decoder = new TextDecoder(decoder);
-  return decoder.decode(ab);
-}
-
-function u8stoab(u8s: string_uint8): ArrayBuffer {
-  return Uint8Array.from(u8s, (c) => c.charCodeAt(0)).buffer;
-}
-
-function b64urlDecode(b64u: string_b64url): ArrayBuffer {
-  return u8stoab(atob(b64urlUnpack(b64u)));
 }
